@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Environment(Enum):
     DESKTOP = "desktop"
+    PRODUCTION = "production"
     
 class AppSettings(BaseSettings):
     environment:Environment = Environment.DESKTOP

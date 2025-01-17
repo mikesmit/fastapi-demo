@@ -1,4 +1,8 @@
+from dataclasses import dataclass
+from time import time
 import os
+from fastapi import FastAPI, Request
+from fastapi.routing import APIRoute, get_request_handler
 from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_INSTANCE_ID, Resource
 
 from opentelemetry import trace
@@ -13,7 +17,14 @@ from opentelemetry.instrumentation.logging import LoggingInstrumentor
 import logging
 from pythonjsonlogger.json import JsonFormatter
 
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
+
+from starlette.routing import Match
+
 from app.settings import Environment, get_settings
+
+from .middleware import Middleware
 
 #Configure opentelemetry 
 # 1. to include python logs and
@@ -60,7 +71,26 @@ def initialize_desktop():
     meterProvider = MeterProvider(resource=resource, metric_readers=[reader])
     metrics.set_meter_provider(meterProvider)
 
-def initialize():
+def initialize_prod():
+    traceProvider = TracerProvider(resource=resource)
+    processor = BatchSpanProcessor(CloudTraceSpanExporter())
+    traceProvider.add_span_processor(processor)
+    trace.set_tracer_provider(traceProvider)
+
+    reader = PeriodicExportingMetricReader(
+        CloudMonitoringMetricsExporter()
+    )
+    meterProvider = MeterProvider(metric_readers=[reader], resource=resource)
+    metrics.set_meter_provider(meterProvider)
+        
+
+def initialize(app:FastAPI):
+    middleware = Middleware(app)
+    app.middleware("http")(middleware)
+
     match get_settings().environment:
         case Environment.DESKTOP:
             return initialize_desktop()
+        case Environment.PRODUCTION:
+            return initialize_prod()
+

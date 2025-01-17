@@ -23,6 +23,9 @@ def build_engine()->Engine:
     match get_settings().environment:
         case Environment.DESKTOP:
             return build_desktop_engine()
+        case Environment.PRODUCTION:
+            #TODO fix
+            return build_desktop_engine()
 
 engine = build_engine()
 
