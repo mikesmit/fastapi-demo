@@ -22,7 +22,7 @@ from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExport
 
 from starlette.routing import Match
 
-from app.settings import Environment, get_settings
+from fastapi_demo.settings import Environment, get_settings
 
 from .middleware import Middleware
 

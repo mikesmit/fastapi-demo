@@ -1,9 +1,9 @@
 from typing import Annotated, Callable, Tuple
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from sqlmodel import Field, SQLModel
-from app.database import SessionDep
-from app.auth import auth, optional_auth
-from app.database import SessionDep
+from fastapi_demo.database import SessionDep
+from fastapi_demo.auth import auth, optional_auth
+from fastapi_demo.database import SessionDep
 import logging
 
 #Use standard python logging 

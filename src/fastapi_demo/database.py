@@ -4,7 +4,7 @@ from sqlalchemy import Engine
 from sqlmodel import SQLModel, Session, StaticPool, create_engine
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from pathlib import Path
-from app.settings import Environment, get_settings
+from fastapi_demo.settings import Environment, get_settings
 
 # Generally following the guidance for SQL in fastAPI here
 # https://fastapi.tiangolo.com/tutorial/sql-databases/

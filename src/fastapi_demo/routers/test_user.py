@@ -2,11 +2,11 @@ from typing import Any
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.testclient import TestClient
-from app.routers.test_common import createApi
+from fastapi_demo.routers.test_common import createApi
 import pytest
 from .user import router
 from pydantic_core import from_json, to_json
-from app.auth import auth, optional_auth
+from fastapi_demo.auth import auth, optional_auth
 
 
 def auth_override(creds:HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))):

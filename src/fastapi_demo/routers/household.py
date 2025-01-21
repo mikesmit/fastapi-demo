@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from sqlmodel import Session, SQLModel, Field
-from app.database import SessionDep
+from fastapi_demo.database import SessionDep
 
 router = APIRouter()
 

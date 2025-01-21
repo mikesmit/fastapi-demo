@@ -1,7 +1,7 @@
 from fastapi import APIRouter, FastAPI
 from sqlmodel import SQLModel
 
-from app.database import create_db_and_tables, engine
+from fastapi_demo.database import create_db_and_tables, engine
 
 
 def createApi(router:APIRouter):

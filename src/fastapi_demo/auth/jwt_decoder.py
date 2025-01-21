@@ -4,7 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 import logging
 
-from app.settings import get_settings
+from fastapi_demo.settings import get_settings
 
 #Use standard python logging
 LOG = logging.getLogger(__name__)
