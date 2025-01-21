@@ -4,7 +4,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 import logging
 
-from fastapi_demo.settings import get_settings
+# Based on the auth0 article: https://auth0.com/blog/build-and-secure-fastapi-server-with-auth0/
 
 #Use standard python logging
 LOG = logging.getLogger(__name__)
@@ -14,9 +14,9 @@ class JWTDecoder:
     Parse and verify the JWT, verifying the correct issuer and audience and returning
     the parsed token with all fields.
     '''
-    def __init__(self, auto_error:bool = True ):
-        self.issuer = get_settings().jwt_issuer
-        self.audience = get_settings().jwt_audience
+    def __init__(self, issuer:str, audience:str, auto_error:bool = True ):
+        self.issuer = issuer
+        self.audience = audience
         self.auto_error = auto_error
         jwks_url = f'{self.issuer}.well-known/jwks.json'
         self.jwks_client = jwt.PyJWKClient(jwks_url)
@@ -27,7 +27,7 @@ class JWTDecoder:
             return self._validate(token)
         except HTTPException as err:
             if self.auto_error:
-                LOG.info("Invalid auth token. Throwing 4XX error")
+                LOG.info("Invalid auth token: Throwing 4XX error")
                 raise err
             else:
                 LOG.info("Ignoring invalid auth token")
@@ -61,6 +61,6 @@ class JWTDecoder:
                 issuer=self.issuer
             )
         except Exception as error:
-            LOG.info("Invalid bearer token: {error}")
+            LOG.info(f"Invalid bearer token: {error}")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         return payload

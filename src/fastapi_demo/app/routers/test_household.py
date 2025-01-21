@@ -1,10 +1,16 @@
-from .test_common import createApi
+from sqlmodel import SQLModel
+
+from fastapi_demo.core.database import create_session_dep
+from .test_common import createApi, engine
 from fastapi.testclient import TestClient
-from .household import router
+from .household import create_router
 import pytest
 
 @pytest.fixture
 def client()->TestClient:
+    SQLModel.metadata.drop_all(bind=engine)
+    SQLModel.metadata.create_all(engine)
+    router = create_router(session_dependency=create_session_dep(engine))
     api = createApi(router)
     return TestClient(api)
 

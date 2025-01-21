@@ -8,6 +8,6 @@ This package is a demonstration of a basic SQL-backed application with the follo
 To use:
 1. python3 -m venv .venv
 2. source .venv/bin/activate
-3. pip install -r requirements.txt
-4. fastapi dev
+3. JWT_ISSUER="..." JWT_AUDIENCE="..." pip install -r requirements.txt
+4. cd src/fastapi_demo; fastapi dev
 5. open a browser to http://localhost:8000/docs

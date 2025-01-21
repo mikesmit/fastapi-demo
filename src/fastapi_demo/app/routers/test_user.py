@@ -2,11 +2,12 @@ from typing import Any
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.testclient import TestClient
-from fastapi_demo.routers.test_common import createApi
+from sqlmodel import SQLModel
+from .test_common import createApi, engine
 import pytest
-from .user import router
-from pydantic_core import from_json, to_json
-from fastapi_demo.auth import auth, optional_auth
+from .user import create_router
+from pydantic_core import from_json
+from fastapi_demo.core.database import create_session_dep
 
 
 def auth_override(creds:HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))):
@@ -30,9 +31,12 @@ def optional_auth_override(creds:HTTPAuthorizationCredentials | None = Depends(H
 
 @pytest.fixture
 def client()->TestClient:
+    SQLModel.metadata.drop_all(bind=engine)
+    SQLModel.metadata.create_all(engine)
+    router = create_router(session_dependency=create_session_dep(engine),
+                           optional_auth=optional_auth_override,
+                           auth=auth_override)
     api = createApi(router)
-    api.dependency_overrides[auth] = auth_override
-    api.dependency_overrides[optional_auth] = optional_auth_override
     return TestClient(api)
 
 
