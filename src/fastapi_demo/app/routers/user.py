@@ -1,6 +1,7 @@
 from typing import Annotated, Any, Callable, Tuple
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials
+from pydantic import BaseModel
 from sqlmodel import Field, SQLModel, Session
 from fastapi_demo.core.database import SessionGeneratorFactory
 from fastapi_demo.core.auth import JWTDecoder
@@ -33,6 +34,12 @@ class UserCreate(UserBase):
 class UserPrivate(User):
     pass
 
+class AuthorizedUser(BaseModel):
+    user:User
+    authorized:bool
+
+AuthType = Callable[[HTTPAuthorizationCredentials | None], Any]
+
 
 def _get_user(id:int, session:Session)->User:
     user = session.get(User, id);
@@ -45,8 +52,8 @@ def _get_user(id:int, session:Session)->User:
 # at least for the security dependencies if you use app.override_dependencies it
 # looses the security annotation information and doesn't generate the client properly.
 def create_router(session_dependency:SessionGeneratorFactory,
-                  optional_auth:Callable[[HTTPAuthorizationCredentials | None], Any],
-                  auth:Callable[[HTTPAuthorizationCredentials | None], Any])->APIRouter:
+                  optional_auth:AuthType,
+                  auth:AuthType)->APIRouter:
     router = APIRouter()
     # Replace this with whatever authorization scheme you prefer
     # Currently verifies the bearer token is the same user as the
@@ -72,12 +79,12 @@ def create_router(session_dependency:SessionGeneratorFactory,
         
         async def __call__(self, id:int,
                            session:Annotated[Session, Depends(session_dependency)],
-                           token = Security(optional_auth))->Tuple[User, bool]:  
+                           token = Security(optional_auth))->AuthorizedUser:  
             user = _get_user(id, session)
             authorized = self._check(user, token)
             if not(authorized) and self.auto_error:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
-            return user, authorized
+            return AuthorizedUser(user=user, authorized=authorized)
 
 
     auth_user = AuthUser(auto_error=True)
@@ -99,20 +106,18 @@ def create_router(session_dependency:SessionGeneratorFactory,
 
 
     @router.get("/user/{id}")
-    def get_user(authUser:Annotated[Tuple[User, bool] ,Depends(auth_user_optional)])->UserPublic | UserPrivate:
-        [user, authorized] = authUser
+    def get_user(authUser:Annotated[AuthorizedUser ,Depends(auth_user_optional)])->UserPublic | UserPrivate:
         # model_validate will automatically convert the data in the 
         # database model for a full row into just the fields defined in the
         # target model.
-        if authorized:
-            return UserPrivate.model_validate(user)
-        return UserPublic.model_validate(user)
+        if authUser.authorized:
+            return UserPrivate.model_validate(authUser.user)
+        return UserPublic.model_validate(authUser.user)
 
     @router.delete("/user/{id}")
     def delete_user(session:Annotated[Session, Depends(session_dependency)],
-                    authUser:Annotated[Tuple[User, bool], Depends(auth_user)])->None:
-        [user,_] = authUser
-        session.delete(user)
+                    authUser:Annotated[AuthorizedUser, Depends(auth_user)])->None:
+        session.delete(authUser.user)
         session.commit()
     
     return router

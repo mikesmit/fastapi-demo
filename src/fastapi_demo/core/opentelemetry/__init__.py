@@ -33,7 +33,6 @@ class GCPLoggingInstrumentor:
     def instrument(self):
         from opentelemetry.instrumentation.logging import LoggingInstrumentor
         from pythonjsonlogger.json import JsonFormatter
-        LoggingInstrumentor().instrument()
         logHandler = logging.StreamHandler()
         formatter = JsonFormatter(
             "%(asctime)s %(levelname)s %(message)s %(otelTraceID)s %(otelSpanID)s %(otelTraceSampled)s",
@@ -51,6 +50,7 @@ class GCPLoggingInstrumentor:
             level=logging.INFO,
             handlers=[logHandler],
         )
+        LoggingInstrumentor().instrument()
 
 def export_ot_to_console(resource:Resource):
     '''
