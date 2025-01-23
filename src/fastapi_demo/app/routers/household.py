@@ -12,6 +12,7 @@ class Household(HouseholdBase, table=True):
 class HouseholdCreate(HouseholdBase):
     pass
 
+
 def create_router(session_dependency:SessionGeneratorFactory):
     router = APIRouter()
     

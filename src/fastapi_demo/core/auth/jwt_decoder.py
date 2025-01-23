@@ -46,10 +46,10 @@ class JWTDecoder:
                 token.credentials
             ).key
         except jwt.exceptions.PyJWKClientError as error:
-            LOG.error("Unable to get public key for JWT validateion: {error}")
+            LOG.error(f"Unable to get public key for JWT validation: {error}")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         except jwt.exceptions.DecodeError as error:
-            LOG.error("Unable to get public key for JWT validateion: {error}")
+            LOG.error(f"Unable to get public key for JWT validation: {error}")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
         try:

@@ -1,10 +1,10 @@
-from typing import Any, Callable
 from fastapi import FastAPI
 from sqlalchemy import Engine
 
 from fastapi_demo.core.auth.jwt_decoder import JWTDecoder
 from fastapi_demo.core.database import create_session_dep
 from .routers import include_all_routers
+import logging
 
 '''
 Application defined as routers completely indipendent of environment allowing it

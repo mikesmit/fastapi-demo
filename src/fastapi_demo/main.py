@@ -20,7 +20,6 @@ specific example instantiation of the app configured by a .env file
 
 logger = logging.getLogger(__name__)
 
-print(f"{get_settings()}")
 #configure database
 #manage tables directly from defined models.
 engine = create_sqlite_engine()
